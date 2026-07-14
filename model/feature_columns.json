@@ -1,0 +1,20 @@
+[
+  "gender",
+  "SeniorCitizen",
+  "Partner",
+  "Dependents",
+  "tenure",
+  "PaperlessBilling",
+  "MonthlyCharges",
+  "TotalCharges",
+  "Contract_Month-to-month",
+  "Contract_One year",
+  "Contract_Two year",
+  "InternetService_DSL",
+  "InternetService_Fiber optic",
+  "InternetService_No",
+  "PaymentMethod_Bank transfer (automatic)",
+  "PaymentMethod_Credit card (automatic)",
+  "PaymentMethod_Electronic check",
+  "PaymentMethod_Mailed check"
+]

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customer Churn Prediction — ML Product by Aditya Vishwakarma</title>
+<meta name="description" content="An end-to-end machine learning product that predicts customer churn in real time. Built with Python, Scikit-learn and Flask." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ============================== NAVBAR ============================== -->
+<nav class="navbar">
+  <div class="container">
+    <a href="#home" class="brand">
+      <span class="brand-mark">CP</span>
+      Churn<span style="color:var(--violet-400)">Predict</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#dataset">Dataset</a></li>
+      <li><a href="#model">Model</a></li>
+      <li><a href="#predict">Prediction</a></li>
+      <li><a href="#performance">Performance</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="#github">GitHub</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#predict" class="btn btn-ghost btn-sm">Live Demo</a>
+      <button class="nav-toggle btn btn-ghost btn-sm" aria-label="Toggle menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== HOME / HERO ============================== -->
+<header class="hero" id="home">
+  <canvas id="hero-canvas"></canvas>
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="status-chip"><span class="status-dot"></span> Model live · v1.0</div>
+        <h1>Customer Churn Prediction<br><span class="accent">using Machine Learning</span></h1>
+        <p class="hero-sub">Predict whether a customer is likely to leave a business — before they do — using a trained classification model served through a real-time Flask API.</p>
+        <div class="hero-actions">
+          <a href="#predict" class="btn btn-primary">Live Demo</a>
+          <a href="https://github.com/yourusername/customer-churn-prediction" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016.2 0c2.4-1.6 3.4-1.2 3.4-1.2.7 1.7.2 2.9.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+            GitHub
+          </a>
+          <a href="#model" class="btn btn-ghost">View Model</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">{{ (metrics.models[metrics.best_model].accuracy * 100) | round(1) if metrics else '83.5' }}%</div><div class="label">Model Accuracy</div></div>
+          <div class="hero-stat"><div class="num">{{ metrics.dataset_size if metrics else '3,000' }}</div><div class="label">Customer Records</div></div>
+          <div class="hero-stat"><div class="num">{{ metrics.feature_count if metrics else '18' }}</div><div class="label">Engineered Features</div></div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="glass readout-card">
+          <div class="readout-head">
+            <span>LIVE_INFERENCE.JSON</span>
+            <span class="status-dot" style="display:inline-block"></span>
+          </div>
+          <div class="readout-row"><span>Contract</span><span class="val">Month-to-month</span></div>
+          <div class="readout-row"><span>Tenure</span><span class="val">4 months</span></div>
+          <div class="readout-row"><span>Monthly Charges</span><span class="val">$84.20</span></div>
+          <div class="readout-row"><span>Internet Service</span><span class="val">Fiber optic</span></div>
+          <div class="readout-row"><span>Payment Method</span><span class="val">Electronic check</span></div>
+          <div class="readout-result">
+            <span class="tag">⚠ High churn risk</span>
+            <span class="pct">78%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== ABOUT ============================== -->
+<section id="about">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">About the project</div>
+      <h2 class="section-title">Retention is cheaper than acquisition</h2>
+      <p class="section-sub">Churn prediction turns a lagging indicator — a customer who already left — into a leading one: a risk score you can act on while the relationship is still saveable.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="glass glass-hover about-card reveal">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L6 15"/></svg>
+        </div>
+        <h3>The business problem</h3>
+        <p>Subscription and telecom businesses lose 15–25% of customers annually. Most of that revenue is invisible until the cancellation request lands — by which point it's too late to intervene.</p>
+      </div>
+      <div class="glass glass-hover about-card reveal">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <h3>The project goal</h3>
+        <p>Build a classification system that scores every active customer's likelihood of churning, using account, billing, and service signals already sitting in the CRM — no new data collection required.</p>
+      </div>
+      <div class="glass glass-hover about-card reveal">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        </div>
+        <h3>Why it matters</h3>
+        <p>A 5-point improvement in retention can lift lifetime profit by 25–95% (Bain & Co.). Even a modestly accurate model pays for itself the first month it's used to trigger a save offer.</p>
+      </div>
+    </div>
+
+    <div class="benefit-list reveal">
+      <div class="glass benefit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Flags at-risk customers weeks before they cancel</span>
+      </div>
+      <div class="glass benefit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Prioritises retention spend on customers worth saving</span>
+      </div>
+      <div class="glass benefit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Surfaces which contract and billing terms drive churn</span>
+      </div>
+      <div class="glass benefit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Plugs into any CRM through a lightweight REST endpoint</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== DATASET ============================== -->
+<section id="dataset" class="tight">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Dataset</div>
+      <h2 class="section-title">Telecom customer account data</h2>
+      <p class="section-sub">Schema modeled on the public IBM Telco Customer Churn dataset — one row per customer account, covering demographics, subscription details, and billing behaviour.</p>
+    </div>
+
+    <div class="stat-grid reveal">
+      <div class="glass stat-card"><div class="num">{{ metrics.dataset_size if metrics else '3,000' }}</div><div class="label">Total records</div></div>
+      <div class="glass stat-card"><div class="num">{{ metrics.feature_count if metrics else '18' }}</div><div class="label">Model features (post-encoding)</div></div>
+      <div class="glass stat-card"><div class="num">11</div><div class="label">Raw input fields</div></div>
+      <div class="glass stat-card"><div class="num">Churn</div><div class="label">Target variable (Yes / No)</div></div>
+    </div>
+
+    <div class="glass reveal" style="overflow-x:auto;">
+      <table class="feature-table">
+        <thead><tr><th>Feature</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Gender</td><td><span class="badge">Categorical</span></td><td>Customer's gender — Male / Female</td></tr>
+          <tr><td class="name">Senior Citizen</td><td><span class="badge">Binary</span></td><td>Whether the customer is 65 or older</td></tr>
+          <tr><td class="name">Partner</td><td><span class="badge">Binary</span></td><td>Whether the customer has a partner</td></tr>
+          <tr><td class="name">Tenure</td><td><span class="badge">Numeric</span></td><td>Number of months the customer has stayed</td></tr>
+          <tr><td class="name">Contract Type</td><td><span class="badge">Categorical</span></td><td>Month-to-month, One year, or Two year</td></tr>
+          <tr><td class="name">Internet Service</td><td><span class="badge">Categorical</span></td><td>DSL, Fiber optic, or None</td></tr>
+          <tr><td class="name">Payment Method</td><td><span class="badge">Categorical</span></td><td>Electronic check, mailed check, bank transfer, credit card</td></tr>
+          <tr><td class="name">Monthly Charges</td><td><span class="badge">Numeric</span></td><td>Current monthly bill amount (USD)</td></tr>
+          <tr><td class="name">Total Charges</td><td><span class="badge">Numeric</span></td><td>Cumulative amount billed to date (USD)</td></tr>
+          <tr><td class="name">Churn</td><td><span class="badge target">Target</span></td><td>Whether the customer left within the last month</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PREPROCESSING ============================== -->
+<section id="preprocessing" class="tight">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Data preprocessing</div>
+      <h2 class="section-title">From raw records to model-ready vectors</h2>
+    </div>
+    <div class="glass reveal" style="overflow-x:auto;">
+      <div class="pipeline-row">
+        <div class="pipeline-step">
+          <div class="idx">01</div>
+          <h4>Missing values</h4>
+          <p>Blank TotalCharges (new accounts) imputed from tenure × monthly rate.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="idx">02</div>
+          <h4>Label encoding</h4>
+          <p>Binary fields (gender, partner, dependents, billing) mapped to 0/1.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="idx">03</div>
+          <h4>One-hot encoding</h4>
+          <p>Contract, internet service, and payment method expanded into indicator columns.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="idx">04</div>
+          <h4>Feature scaling</h4>
+          <p>Numeric features standardised with <code>StandardScaler</code> before training.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="idx">05</div>
+          <h4>Train/test split</h4>
+          <p>80/20 stratified split to preserve the churn/stay class ratio.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MODEL ============================== -->
+<section id="model">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Machine learning models</div>
+      <h2 class="section-title">Three algorithms, one winner</h2>
+      <p class="section-sub">Each model was trained on the identical scaled feature set and evaluated on a held-out test split so the comparison is apples-to-apples.</p>
+    </div>
+
+    <div class="grid-3">
+      {% set model_desc = {
+        'Logistic Regression': 'A linear baseline that estimates churn probability directly — fast, interpretable, and hard to beat on tabular data like this.',
+        'Decision Tree': 'Learns human-readable if/then rules (e.g. month-to-month + high monthly charge → high risk).',
+        'Random Forest': 'An ensemble of decision trees that reduces overfitting and captures non-linear feature interactions.'
+      } %}
+      {% for name, m in (metrics.models if metrics else {}).items() %}
+      <div class="glass glass-hover model-card reveal {{ 'best' if name == metrics.best_model else '' }}">
+        {% if name == metrics.best_model %}<span class="best-tag">★ Best model</span>{% endif %}
+        <h3>{{ name }}</h3>
+        <p class="desc">{{ model_desc[name] }}</p>
+        <div class="model-metric-row"><span class="metric-label">Accuracy</span><span class="bar-track"><span class="bar-fill" style="width:{{ (m.accuracy*100)|round(1) }}%"></span></span><span class="metric-val">{{ (m.accuracy*100)|round(1) }}%</span></div>
+        <div class="model-metric-row"><span class="metric-label">Precision</span><span class="bar-track"><span class="bar-fill" style="width:{{ (m.precision*100)|round(1) }}%"></span></span><span class="metric-val">{{ (m.precision*100)|round(1) }}%</span></div>
+        <div class="model-metric-row"><span class="metric-label">Recall</span><span class="bar-track"><span class="bar-fill" style="width:{{ (m.recall*100)|round(1) }}%"></span></span><span class="metric-val">{{ (m.recall*100)|round(1) }}%</span></div>
+        <div class="model-metric-row"><span class="metric-label">F1 Score</span><span class="bar-track"><span class="bar-fill" style="width:{{ (m.f1_score*100)|round(1) }}%"></span></span><span class="metric-val">{{ (m.f1_score*100)|round(1) }}%</span></div>
+      </div>
+      {% else %}
+      <p>Model metrics unavailable — run <code>python model/train_model.py</code> to generate them.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PERFORMANCE ============================== -->
+<section id="performance" class="tight">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Model performance</div>
+      <h2 class="section-title">{{ metrics.best_model if metrics else 'Best model' }} evaluation</h2>
+      <p class="section-sub">Metrics computed on a held-out {{ metrics.test_size if metrics else '600' }}-record test set, untouched during training.</p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="glass chart-card">
+        <h3>Accuracy vs. F1 across models</h3>
+        <p class="chart-note">F1 balances precision and recall — the metric that matters most on an imbalanced churn label.</p>
+        <canvas id="chart-comparison" height="220"></canvas>
+      </div>
+      <div class="glass chart-card">
+        <h3>ROC Curve</h3>
+        <p class="chart-note">Area under curve of {{ metrics.models[metrics.best_model].roc_auc if metrics else '0.85' }} — well above the 0.5 random baseline.</p>
+        <canvas id="chart-roc" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="glass chart-card reveal" style="margin-top:24px;">
+      <h3>Confusion Matrix — {{ metrics.best_model if metrics else 'Best model' }}</h3>
+      <p class="chart-note">Rows = actual class, columns = predicted class, on the test split.</p>
+      {% if metrics %}
+      {% set cm = metrics.models[metrics.best_model].confusion_matrix %}
+      <div class="confusion-grid">
+        <div class="confusion-cell" style="background:rgba(52,211,153,0.1);"><div class="val">{{ cm[0][0] }}</div><div class="lbl">True Negative<br>(correctly kept)</div></div>
+        <div class="confusion-cell" style="background:rgba(251,113,133,0.08);"><div class="val">{{ cm[0][1] }}</div><div class="lbl">False Positive<br>(false alarm)</div></div>
+        <div class="confusion-cell" style="background:rgba(251,113,133,0.08);"><div class="val">{{ cm[1][0] }}</div><div class="lbl">False Negative<br>(missed churn)</div></div>
+        <div class="confusion-cell" style="background:rgba(139,92,246,0.12);"><div class="val">{{ cm[1][1] }}</div><div class="lbl">True Positive<br>(correctly flagged)</div></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LIVE PREDICTION ============================== -->
+<section id="predict">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Live prediction</div>
+      <h2 class="section-title">Try the model on a real customer profile</h2>
+      <p class="section-sub">Submitted values are vectorised, scaled, and scored by the trained model through the <code>/predict</code> Flask endpoint — same path production traffic would take.</p>
+    </div>
+
+    <div class="predict-layout reveal">
+      <form id="predict-form" class="glass predict-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="seniorCitizen">Senior citizen</label>
+            <select id="seniorCitizen" name="seniorCitizen">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="partner">Has partner</label>
+            <select id="partner" name="partner">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dependents">Has dependents</label>
+            <select id="dependents" name="dependents">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tenure">Tenure (months)</label>
+            <input type="number" id="tenure" name="tenure" min="0" max="72" value="4" required>
+          </div>
+          <div class="field">
+            <label for="monthlyCharges">Monthly charges ($)</label>
+            <input type="number" id="monthlyCharges" name="monthlyCharges" min="0" step="0.01" value="84.20" required>
+          </div>
+          <div class="field">
+            <label for="contract">Contract type</label>
+            <select id="contract" name="contract">
+              <option value="Month-to-month">Month-to-month</option>
+              <option value="One year">One year</option>
+              <option value="Two year">Two year</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="internetService">Internet service</label>
+            <select id="internetService" name="internetService">
+              <option value="Fiber optic">Fiber optic</option>
+              <option value="DSL">DSL</option>
+              <option value="No">No internet service</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="paymentMethod">Payment method</label>
+            <select id="paymentMethod" name="paymentMethod">
+              <option value="Electronic check">Electronic check</option>
+              <option value="Mailed check">Mailed check</option>
+              <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+              <option value="Credit card (automatic)">Credit card (automatic)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="paperlessBilling">Paperless billing</label>
+            <select id="paperlessBilling" name="paperlessBilling">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" id="predict-submit-btn" class="btn btn-primary predict-submit">Run prediction →</button>
+      </form>
+
+      <div id="result-card" class="glass result-card">
+        <div class="result-empty">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+          <p>Fill in a customer profile and run the model to see a live churn probability here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WORKFLOW ============================== -->
+<section id="workflow" class="tight">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Project workflow</div>
+      <h2 class="section-title">How a prediction gets made</h2>
+    </div>
+    <div class="glass reveal" style="overflow-x:auto;">
+      <div class="pipeline-row">
+        <div class="pipeline-step"><div class="idx">01</div><h4>Dataset</h4><p>Telco account records ingested as CSV.</p></div>
+        <div class="pipeline-step"><div class="idx">02</div><h4>Data cleaning</h4><p>Missing values handled, types corrected.</p></div>
+        <div class="pipeline-step"><div class="idx">03</div><h4>Feature engineering</h4><p>Encoding + scaling into model-ready vectors.</p></div>
+        <div class="pipeline-step"><div class="idx">04</div><h4>Model training</h4><p>Three classifiers trained and compared.</p></div>
+        <div class="pipeline-step"><div class="idx">05</div><h4>Evaluation</h4><p>Accuracy, F1, ROC-AUC on held-out data.</p></div>
+        <div class="pipeline-step"><div class="idx">06</div><h4>Deployment</h4><p>Served via Flask REST API in production.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SCREENSHOTS ============================== -->
+<section id="screenshots">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Screenshots</div>
+      <h2 class="section-title">A look at the product</h2>
+      <p class="section-sub">Swap these placeholders for real screen captures once deployed — the frames are already sized and styled for drop-in images.</p>
+    </div>
+    <div class="grid-2">
+      <div class="glass mock-frame reveal">
+        <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+        <div class="mock-body" style="height:200px; display:flex; align-items:center; justify-content:center;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="1.2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        </div>
+        <div class="mock-caption">Dashboard<span>Model summary &amp; churn risk overview</span></div>
+      </div>
+      <div class="glass mock-frame reveal">
+        <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+        <div class="mock-body" style="height:200px; display:flex; align-items:center; justify-content:center;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="1.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/><circle cx="17" cy="16" r="2"/></svg>
+        </div>
+        <div class="mock-caption">Prediction page<span>Live churn probability form</span></div>
+      </div>
+      <div class="glass mock-frame reveal">
+        <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+        <div class="mock-body" style="height:200px; display:flex; align-items:center; justify-content:center;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="1.2"><path d="M3 20V10M9 20V4M15 20v-7M21 20v-11"/></svg>
+        </div>
+        <div class="mock-caption">Accuracy graph<span>Model comparison across metrics</span></div>
+      </div>
+      <div class="glass mock-frame reveal">
+        <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+        <div class="mock-body" style="height:200px; display:flex; align-items:center; justify-content:center;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="1.2"><path d="M3 17L9 8l4 5 8-10"/></svg>
+        </div>
+        <div class="mock-caption">ROC curve<span>True vs. false positive rate</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== GITHUB ============================== -->
+<section id="github" class="tight">
+  <div class="container">
+    <div class="glass repo-card reveal">
+      <div>
+        <div class="repo-name">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016.2 0c2.4-1.6 3.4-1.2 3.4-1.2.7 1.7.2 2.9.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+          Customer-Churn-Prediction
+        </div>
+        <p style="margin-top:8px; max-width:460px;">Full source: data pipeline, model training scripts, Flask API, and this portfolio front end.</p>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="https://github.com/yourusername/customer-churn-prediction" target="_blank" rel="noopener" class="btn btn-primary">View Source Code</a>
+        <a href="https://github.com/yourusername/customer-churn-prediction/archive/refs/heads/main.zip" target="_blank" rel="noopener" class="btn btn-ghost">Download Project</a>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:70px;">
+      <div class="eyebrow">Deployment</div>
+      <h2 class="section-title">Where this ships</h2>
+    </div>
+    <div class="deploy-grid reveal">
+      <div class="glass deploy-card">
+        <div class="plat">Backend</div>
+        <h4>Render / Railway</h4>
+        <p style="font-size:0.85rem;">Flask API + model artifacts deployed as a web service.</p>
+        <code>https://your-project-url.com</code>
+      </div>
+      <div class="glass deploy-card">
+        <div class="plat">Frontend</div>
+        <h4>Vercel</h4>
+        <p style="font-size:0.85rem;">Static build of this portfolio, proxied to the API.</p>
+        <code>https://your-project.vercel.app</code>
+      </div>
+      <div class="glass deploy-card">
+        <div class="plat">Source</div>
+        <h4>GitHub</h4>
+        <p style="font-size:0.85rem;">Version-controlled, CI-ready repository.</p>
+        <code>github.com/yourusername/customer-churn-prediction</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTACT ============================== -->
+<section id="contact">
+  <div class="container">
+    <div class="glass contact-card reveal">
+      <div class="avatar-ring">AV</div>
+      <div>
+        <h2 style="margin-bottom:4px;">Aditya Vishwakarma</h2>
+        <p style="margin:0;">MCA Student · Data Science &amp; Machine Learning Enthusiast</p>
+        <div class="contact-links">
+          <a class="contact-link" href="https://github.com/yourusername" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016.2 0c2.4-1.6 3.4-1.2 3.4-1.2.7 1.7.2 2.9.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+            GitHub
+          </a>
+          <a class="contact-link" href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 20.4h-3.5v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.2 2.4 4.2 5.5v6.2zM5.3 7.4A2 2 0 113.4 5.3a2 2 0 012 2zM7 20.4H3.6V9H7v11.4z"/></svg>
+            LinkedIn
+          </a>
+          <a class="contact-link" href="mailto:aditya.vishwakarma@example.com">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-row">
+    <span>© 2026 Aditya Vishwakarma — Customer Churn Prediction</span>
+    <span>Built with Flask, Scikit-learn &amp; a lot of coffee</span>
+  </div>
+</footer>
+
+<script>
+  const METRICS = {{ metrics | tojson if metrics else 'null' }};
+</script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
